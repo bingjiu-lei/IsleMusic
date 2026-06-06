@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "Isle Music" "\0"
-            VALUE "FileDescription", "Isle Music" "\0"
+            VALUE "CompanyName", "SunnyTune Music" "\0"
+            VALUE "FileDescription", "SunnyTune Music" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "IsleMusic" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 Isle Music. All rights reserved." "\0"
-            VALUE "OriginalFilename", "IsleMusic.exe" "\0"
-            VALUE "ProductName", "Isle Music" "\0"
+            VALUE "InternalName", "SunnyTuneMusic" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 SunnyTune Music. All rights reserved." "\0"
+            VALUE "OriginalFilename", "SunnyTuneMusic.exe" "\0"
+            VALUE "ProductName", "SunnyTune Music" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

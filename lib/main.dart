@@ -12,31 +12,43 @@ class IsleMusicApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Isle Music',
+      title: 'SunnyTune Music',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: 'Microsoft YaHei',
-        scaffoldBackgroundColor: IsleColors.page,
+        scaffoldBackgroundColor: SunTuneColors.page,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: IsleColors.primary,
+          seedColor: SunTuneColors.primary,
           brightness: Brightness.light,
         ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: SunTuneColors.primaryStrong,
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       ),
-      home: const IsleMusicShell(),
+      home: const SunTuneShell(),
     );
   }
 }
 
-class IsleColors {
-  static const page = Color(0xFFF5F8F8);
+class SunTuneColors {
+  static const page = Color(0xFFF4F8F9);
+  static const pageSoft = Color(0xFFEAF4F6);
   static const surface = Color(0xFFFFFFFF);
-  static const glass = Color(0xCCFFFFFF);
-  static const primary = Color(0xFF18B6A7);
-  static const primaryDark = Color(0xFF0E8F84);
-  static const text = Color(0xFF162222);
-  static const muted = Color(0xFF728080);
-  static const border = Color(0xFFE3ECEB);
+  static const surfaceSoft = Color(0xFFF8FBFB);
+  static const glass = Color(0xEAFBFEFE);
+  static const primary = Color(0xFF4AAFB8);
+  static const primaryStrong = Color(0xFF247F8B);
+  static const primarySoft = Color(0xFFE4F4F6);
+  static const sky = Color(0xFF9ECFE0);
+  static const sun = Color(0xFFF4C96A);
+  static const text = Color(0xFF172426);
+  static const muted = Color(0xFF6D7D80);
+  static const faint = Color(0xFF9AA9AB);
+  static const border = Color(0xFFDDE9EA);
 }
 
 class DemoSong {
@@ -59,11 +71,11 @@ class DemoSong {
 
 const demoSongs = [
   DemoSong(
-    title: '海风来信',
-    artist: 'Isle Band',
-    album: '青屿日记',
+    title: '晴窗来信',
+    artist: 'North Tide',
+    album: '晴听日记',
     duration: '03:42',
-    color: Color(0xFF8FD6CC),
+    color: Color(0xFFA7D8D6),
     liked: true,
   ),
   DemoSong(
@@ -71,40 +83,40 @@ const demoSongs = [
     artist: 'Mellow Room',
     album: 'Clear Day',
     duration: '04:16',
-    color: Color(0xFFC5E6D7),
+    color: Color(0xFFBFDCCF),
   ),
   DemoSong(
     title: '岛屿电台',
-    artist: 'North Tide',
+    artist: 'Blue Hour',
     album: 'Wave Signal',
     duration: '03:28',
-    color: Color(0xFF9EC7DF),
+    color: Color(0xFFAACDE1),
   ),
   DemoSong(
     title: '晴色漫游',
-    artist: 'Blue Hour',
+    artist: 'Soft Echo',
     album: 'Light Walk',
     duration: '03:55',
-    color: Color(0xFFE8D9A6),
+    color: Color(0xFFEAD492),
   ),
   DemoSong(
     title: '远处的灯',
-    artist: 'Soft Echo',
-    album: 'Night Window',
+    artist: 'Night Window',
+    album: 'Quiet Road',
     duration: '04:02',
-    color: Color(0xFFD8C4E8),
+    color: Color(0xFFCABFE2),
     liked: true,
   ),
 ];
 
-class IsleMusicShell extends StatefulWidget {
-  const IsleMusicShell({super.key});
+class SunTuneShell extends StatefulWidget {
+  const SunTuneShell({super.key});
 
   @override
-  State<IsleMusicShell> createState() => _IsleMusicShellState();
+  State<SunTuneShell> createState() => _SunTuneShellState();
 }
 
-class _IsleMusicShellState extends State<IsleMusicShell> {
+class _SunTuneShellState extends State<SunTuneShell> {
   int selectedIndex = 0;
   int currentSongIndex = 0;
   bool isPlaying = true;
@@ -114,123 +126,79 @@ class _IsleMusicShellState extends State<IsleMusicShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          const _AmbientBackground(),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        _Sidebar(
-                          selectedIndex: selectedIndex,
-                          onChanged: (index) {
-                            setState(() => selectedIndex = index);
-                          },
-                        ),
-                        const SizedBox(width: 18),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              const _TopBar(),
-                              const SizedBox(height: 18),
-                              Expanded(
-                                child: _HomeContent(
-                                  onPlay: (index) {
-                                    setState(() {
-                                      currentSongIndex = index;
-                                      isPlaying = true;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  _PlayerBar(
-                    song: currentSong,
-                    isPlaying: isPlaying,
-                    onTogglePlay: () {
-                      setState(() => isPlaying = !isPlaying);
-                    },
-                    onPrevious: () {
-                      setState(() {
-                        currentSongIndex =
-                            (currentSongIndex - 1 + demoSongs.length) %
-                            demoSongs.length;
-                      });
-                    },
-                    onNext: () {
-                      setState(() {
-                        currentSongIndex =
-                            (currentSongIndex + 1) % demoSongs.length;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              SunTuneColors.page,
+              SunTuneColors.pageSoft,
+              Color(0xFFFAFCFC),
+            ],
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AmbientBackground extends StatelessWidget {
-  const _AmbientBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF7FBFA), Color(0xFFEFF7F5), Color(0xFFF8FAFA)],
         ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            top: -120,
-            right: -80,
-            child: _SoftGlow(color: IsleColors.primary.withValues(alpha: 0.18)),
-          ),
-          Positioned(
-            bottom: -160,
-            left: 240,
-            child: _SoftGlow(
-              color: const Color(0xFF9EC7DF).withValues(alpha: 0.16),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      _Sidebar(
+                        selectedIndex: selectedIndex,
+                        onChanged: (index) {
+                          setState(() => selectedIndex = index);
+                        },
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            const _TopBar(),
+                            const SizedBox(height: 18),
+                            Expanded(
+                              child: _HomeContent(
+                                onPlay: (index) {
+                                  setState(() {
+                                    currentSongIndex = index;
+                                    isPlaying = true;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _PlayerBar(
+                  song: currentSong,
+                  isPlaying: isPlaying,
+                  onTogglePlay: () {
+                    setState(() => isPlaying = !isPlaying);
+                  },
+                  onPrevious: () {
+                    setState(() {
+                      currentSongIndex =
+                          (currentSongIndex - 1 + demoSongs.length) %
+                          demoSongs.length;
+                    });
+                  },
+                  onNext: () {
+                    setState(() {
+                      currentSongIndex =
+                          (currentSongIndex + 1) % demoSongs.length;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SoftGlow extends StatelessWidget {
-  const _SoftGlow({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 360,
-      height: 360,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-        boxShadow: [BoxShadow(color: color, blurRadius: 120, spreadRadius: 80)],
+        ),
       ),
     );
   }
@@ -252,13 +220,13 @@ class _GlassPanel extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(borderRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
         child: Container(
           padding: padding,
           decoration: BoxDecoration(
-            color: IsleColors.glass,
+            color: SunTuneColors.glass,
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: IsleColors.border),
+            border: Border.all(color: SunTuneColors.border),
           ),
           child: child,
         ),
@@ -283,7 +251,7 @@ class _Sidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 184,
+      width: 190,
       child: _GlassPanel(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -292,16 +260,16 @@ class _Sidebar extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  width: 42,
-                  height: 42,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: IsleColors.primary,
+                    color: SunTuneColors.primary,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(
-                    Icons.waves_rounded,
+                    Icons.wb_sunny_rounded,
                     color: Colors.white,
-                    size: 24,
+                    size: 23,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -310,27 +278,30 @@ class _Sidebar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '青屿音乐',
+                        '晴听音乐',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: IsleColors.text,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                          color: SunTuneColors.text,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
                         ),
                       ),
                       Text(
-                        'Isle Music',
+                        'SunnyTune Music',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: IsleColors.muted, fontSize: 12),
+                        style: TextStyle(
+                          color: SunTuneColors.muted,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 26),
+            const SizedBox(height: 28),
             for (var i = 0; i < items.length; i++)
               _NavItem(
                 icon: items[i].$1,
@@ -339,38 +310,45 @@ class _Sidebar extends StatelessWidget {
                 onTap: () => onChanged(i),
               ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: IsleColors.primary.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: IsleColors.primary.withValues(alpha: 0.18),
-                ),
-              ),
-              child: const Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: IsleColors.primaryDark,
-                    size: 20,
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '今日权益待领取',
-                      style: TextStyle(
-                        color: IsleColors.primaryDark,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const _EntitlementHint(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _EntitlementHint extends StatelessWidget {
+  const _EntitlementHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: SunTuneColors.primarySoft,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFC9E7EA)),
+      ),
+      child: const Row(
+        children: [
+          Icon(
+            Icons.radio_button_unchecked_rounded,
+            color: SunTuneColors.primaryStrong,
+            size: 18,
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '登录后领取今日权益',
+              style: TextStyle(
+                color: SunTuneColors.primaryStrong,
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -394,9 +372,7 @@ class _NavItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: selected
-            ? IsleColors.primary.withValues(alpha: 0.12)
-            : Colors.transparent,
+        color: selected ? SunTuneColors.primarySoft : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: onTap,
@@ -407,15 +383,19 @@ class _NavItem extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: selected ? IsleColors.primaryDark : IsleColors.muted,
+                  color: selected
+                      ? SunTuneColors.primaryStrong
+                      : SunTuneColors.muted,
                   size: 21,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   label,
                   style: TextStyle(
-                    color: selected ? IsleColors.primaryDark : IsleColors.text,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected
+                        ? SunTuneColors.primaryStrong
+                        : SunTuneColors.text,
+                    fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                   ),
                 ),
               ],
@@ -439,45 +419,37 @@ class _TopBar extends StatelessWidget {
             height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: IsleColors.surface,
+              color: SunTuneColors.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: IsleColors.border),
+              border: Border.all(color: SunTuneColors.border),
             ),
             child: const Row(
               children: [
-                Icon(Icons.search_rounded, color: IsleColors.muted, size: 22),
+                Icon(
+                  Icons.search_rounded,
+                  color: SunTuneColors.muted,
+                  size: 22,
+                ),
                 SizedBox(width: 10),
                 Text(
                   '搜索歌曲、歌手、歌单',
-                  style: TextStyle(color: IsleColors.muted, fontSize: 14),
+                  style: TextStyle(color: SunTuneColors.muted, fontSize: 14),
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(width: 12),
-        _TopAction(
-          icon: Icons.card_giftcard_rounded,
-          label: '签到',
-          highlighted: true,
-        ),
+        const _StatusPill(),
         const SizedBox(width: 12),
-        _TopAction(icon: Icons.person_rounded, label: '未登录'),
+        _PrimaryLoginButton(onPressed: () {}),
       ],
     );
   }
 }
 
-class _TopAction extends StatelessWidget {
-  const _TopAction({
-    required this.icon,
-    required this.label,
-    this.highlighted = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool highlighted;
+class _StatusPill extends StatelessWidget {
+  const _StatusPill();
 
   @override
   Widget build(BuildContext context) {
@@ -485,29 +457,49 @@ class _TopAction extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 14),
       decoration: BoxDecoration(
-        color: highlighted ? IsleColors.primary : IsleColors.surface,
+        color: SunTuneColors.primarySoft,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: highlighted ? IsleColors.primary : IsleColors.border,
-        ),
+        border: Border.all(color: const Color(0xFFC9E7EA)),
       ),
-      child: Row(
+      child: const Row(
         children: [
           Icon(
-            icon,
-            color: highlighted ? Colors.white : IsleColors.muted,
-            size: 20,
+            Icons.card_giftcard_rounded,
+            color: SunTuneColors.primaryStrong,
+            size: 19,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Text(
-            label,
+            '权益待领取',
             style: TextStyle(
-              color: highlighted ? Colors.white : IsleColors.text,
+              color: SunTuneColors.primaryStrong,
               fontWeight: FontWeight.w700,
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _PrimaryLoginButton extends StatelessWidget {
+  const _PrimaryLoginButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: SunTuneColors.primaryStrong,
+        foregroundColor: Colors.white,
+        minimumSize: const Size(106, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      icon: const Icon(Icons.person_rounded, size: 20),
+      label: const Text('登录', style: TextStyle(fontWeight: FontWeight.w800)),
     );
   }
 }
@@ -519,43 +511,37 @@ class _HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(flex: 2, child: _HeroListenCard(onPlay: () => onPlay(0))),
-            const SizedBox(width: 16),
-            const Expanded(child: _CheckinCard()),
-          ],
-        ),
-        const SizedBox(height: 16),
         Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          flex: 3,
+          child: _SectionPanel(
+            title: '最近播放',
+            actionText: '查看全部',
+            child: ListView.separated(
+              itemCount: demoSongs.length,
+              separatorBuilder: (_, _) =>
+                  const Divider(height: 1, color: SunTuneColors.border),
+              itemBuilder: (context, index) {
+                final song = demoSongs[index];
+                return _SongRow(
+                  song: song,
+                  index: index,
+                  onPlay: () => onPlay(index),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        const Expanded(
+          flex: 2,
+          child: Column(
             children: [
+              _CheckinCard(),
+              SizedBox(height: 16),
               Expanded(
-                flex: 3,
-                child: _SectionPanel(
-                  title: '最近播放',
-                  actionText: '查看全部',
-                  child: ListView.separated(
-                    itemCount: demoSongs.length,
-                    separatorBuilder: (_, _) =>
-                        const Divider(height: 1, color: IsleColors.border),
-                    itemBuilder: (context, index) {
-                      final song = demoSongs[index];
-                      return _SongRow(
-                        song: song,
-                        index: index,
-                        onPlay: () => onPlay(index),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              const Expanded(
-                flex: 2,
                 child: _SectionPanel(
                   title: '我的歌单',
                   actionText: '新建',
@@ -570,130 +556,126 @@ class _HomeContent extends StatelessWidget {
   }
 }
 
-class _HeroListenCard extends StatelessWidget {
-  const _HeroListenCard({required this.onPlay});
-
-  final VoidCallback onPlay;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 168,
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        color: IsleColors.primary,
-        borderRadius: BorderRadius.circular(12),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF18B6A7), Color(0xFF5ECBC2)],
-        ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '继续听',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.82),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  '海风来信',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Isle Band · 青屿日记',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.78),
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          FilledButton.icon(
-            onPressed: onPlay,
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: IsleColors.primaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text('播放'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CheckinCard extends StatelessWidget {
   const _CheckinCard();
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 360;
+
+        return Container(
+          height: 150,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: SunTuneColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: SunTuneColors.border),
+          ),
+          child: isCompact
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _CheckinTitleRow(),
+                    const SizedBox(height: 9),
+                    const Text(
+                      '登录后可领取今日权益。',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: SunTuneColors.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const Spacer(),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text('去登录'),
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    const _CheckinIcon(),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '每日权益',
+                            style: TextStyle(
+                              color: SunTuneColors.text,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          SizedBox(height: 7),
+                          Text(
+                            '登录后可领取今日畅听权益。',
+                            style: TextStyle(
+                              color: SunTuneColors.muted,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton(onPressed: () {}, child: const Text('去登录')),
+                  ],
+                ),
+        );
+      },
+    );
+  }
+}
+
+class _CheckinTitleRow extends StatelessWidget {
+  const _CheckinTitleRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        _CheckinIcon(size: 34, iconSize: 20),
+        SizedBox(width: 10),
+        Text(
+          '每日权益',
+          style: TextStyle(
+            color: SunTuneColors.text,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CheckinIcon extends StatelessWidget {
+  const _CheckinIcon({this.size = 50, this.iconSize = 26});
+
+  final double size;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      height: 168,
-      padding: const EdgeInsets.all(18),
+      width: size,
+      height: size,
       decoration: BoxDecoration(
-        color: IsleColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: IsleColors.border),
+        color: SunTuneColors.primarySoft,
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.verified_rounded, color: IsleColors.primaryDark),
-              SizedBox(width: 8),
-              Text(
-                '每日权益',
-                style: TextStyle(
-                  color: IsleColors.text,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            '登录后可领取今日畅听权益。',
-            style: TextStyle(color: IsleColors.muted),
-          ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                foregroundColor: IsleColors.primaryDark,
-                side: const BorderSide(color: IsleColors.primary),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text('去登录'),
-            ),
-          ),
-        ],
+      child: Icon(
+        Icons.verified_rounded,
+        color: SunTuneColors.primaryStrong,
+        size: iconSize,
       ),
     );
   }
@@ -715,9 +697,9 @@ class _SectionPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: IsleColors.surface,
+        color: SunTuneColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: IsleColors.border),
+        border: Border.all(color: SunTuneColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,8 +709,8 @@ class _SectionPanel extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                  color: IsleColors.text,
-                  fontSize: 18,
+                  color: SunTuneColors.text,
+                  fontSize: 19,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -758,14 +740,14 @@ class _SongRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 64,
+      height: 66,
       child: Row(
         children: [
           SizedBox(
             width: 34,
             child: Text(
               '${index + 1}'.padLeft(2, '0'),
-              style: const TextStyle(color: IsleColors.muted),
+              style: const TextStyle(color: SunTuneColors.faint),
             ),
           ),
           _CoverBox(color: song.color, size: 42),
@@ -781,8 +763,8 @@ class _SongRow extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: IsleColors.text,
-                    fontWeight: FontWeight.w700,
+                    color: SunTuneColors.text,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -790,7 +772,10 @@ class _SongRow extends StatelessWidget {
                   song.artist,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: IsleColors.muted, fontSize: 12),
+                  style: const TextStyle(
+                    color: SunTuneColors.muted,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
@@ -800,14 +785,14 @@ class _SongRow extends StatelessWidget {
               song.album,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: IsleColors.muted),
+              style: const TextStyle(color: SunTuneColors.muted),
             ),
           ),
           SizedBox(
             width: 52,
             child: Text(
               song.duration,
-              style: const TextStyle(color: IsleColors.muted),
+              style: const TextStyle(color: SunTuneColors.muted),
             ),
           ),
           IconButton(
@@ -817,15 +802,17 @@ class _SongRow extends StatelessWidget {
               song.liked
                   ? Icons.favorite_rounded
                   : Icons.favorite_border_rounded,
-              color: song.liked ? IsleColors.primary : IsleColors.muted,
+              color: song.liked
+                  ? SunTuneColors.primaryStrong
+                  : SunTuneColors.muted,
             ),
           ),
           IconButton(
             tooltip: '播放',
             onPressed: onPlay,
             icon: const Icon(
-              Icons.play_circle_fill_rounded,
-              color: IsleColors.primary,
+              Icons.play_arrow_rounded,
+              color: SunTuneColors.primaryStrong,
             ),
           ),
         ],
@@ -844,19 +831,19 @@ class _PlaylistPreview extends StatelessWidget {
         _PlaylistCard(
           title: '常听收藏',
           subtitle: '28 首歌曲',
-          color: Color(0xFFC5E6D7),
+          color: Color(0xFFBFDCCF),
         ),
         SizedBox(height: 12),
         _PlaylistCard(
           title: '夜晚放松',
           subtitle: '16 首歌曲',
-          color: Color(0xFF9EC7DF),
+          color: Color(0xFFAACDE1),
         ),
         SizedBox(height: 12),
         _PlaylistCard(
           title: '通勤路上',
           subtitle: '34 首歌曲',
-          color: Color(0xFFD8C4E8),
+          color: Color(0xFFCABFE2),
         ),
       ],
     );
@@ -880,9 +867,9 @@ class _PlaylistCard extends StatelessWidget {
       height: 72,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: IsleColors.page,
+        color: SunTuneColors.surfaceSoft,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: IsleColors.border),
+        border: Border.all(color: SunTuneColors.border),
       ),
       child: Row(
         children: [
@@ -896,19 +883,22 @@ class _PlaylistCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: IsleColors.text,
+                    color: SunTuneColors.text,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: IsleColors.muted, fontSize: 12),
+                  style: const TextStyle(
+                    color: SunTuneColors.muted,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: IsleColors.muted),
+          const Icon(Icons.chevron_right_rounded, color: SunTuneColors.muted),
         ],
       ),
     );
@@ -941,7 +931,7 @@ class _PlayerBar extends StatelessWidget {
             _CoverBox(color: song.color, size: 56),
             const SizedBox(width: 12),
             SizedBox(
-              width: 168,
+              width: 180,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -951,7 +941,7 @@ class _PlayerBar extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: IsleColors.text,
+                      color: SunTuneColors.text,
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                     ),
@@ -962,7 +952,7 @@ class _PlayerBar extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: IsleColors.muted,
+                      color: SunTuneColors.muted,
                       fontSize: 13,
                     ),
                   ),
@@ -972,12 +962,15 @@ class _PlayerBar extends StatelessWidget {
             IconButton(
               tooltip: '上一首',
               onPressed: onPrevious,
-              icon: const Icon(Icons.skip_previous_rounded),
+              icon: const Icon(
+                Icons.skip_previous_rounded,
+                color: SunTuneColors.muted,
+              ),
             ),
             FilledButton(
               onPressed: onTogglePlay,
               style: FilledButton.styleFrom(
-                backgroundColor: IsleColors.primary,
+                backgroundColor: SunTuneColors.primaryStrong,
                 foregroundColor: Colors.white,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(14),
@@ -990,10 +983,13 @@ class _PlayerBar extends StatelessWidget {
             IconButton(
               tooltip: '下一首',
               onPressed: onNext,
-              icon: const Icon(Icons.skip_next_rounded),
+              icon: const Icon(
+                Icons.skip_next_rounded,
+                color: SunTuneColors.muted,
+              ),
             ),
             const SizedBox(width: 20),
-            const Text('01:18', style: TextStyle(color: IsleColors.muted)),
+            const Text('01:18', style: TextStyle(color: SunTuneColors.muted)),
             const SizedBox(width: 10),
             const Expanded(
               child: ClipRRect(
@@ -1001,26 +997,32 @@ class _PlayerBar extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: 0.38,
                   minHeight: 5,
-                  color: IsleColors.primary,
-                  backgroundColor: Color(0xFFE3ECEB),
+                  color: SunTuneColors.primaryStrong,
+                  backgroundColor: Color(0xFFDCE8EA),
                 ),
               ),
             ),
             const SizedBox(width: 10),
             Text(
               song.duration,
-              style: const TextStyle(color: IsleColors.muted),
+              style: const TextStyle(color: SunTuneColors.muted),
             ),
             const SizedBox(width: 18),
             IconButton(
               tooltip: '音量',
               onPressed: () {},
-              icon: const Icon(Icons.volume_up_rounded),
+              icon: const Icon(
+                Icons.volume_up_rounded,
+                color: SunTuneColors.muted,
+              ),
             ),
             IconButton(
               tooltip: '播放队列',
               onPressed: () {},
-              icon: const Icon(Icons.queue_music_rounded),
+              icon: const Icon(
+                Icons.queue_music_rounded,
+                color: SunTuneColors.muted,
+              ),
             ),
           ],
         ),
@@ -1043,15 +1045,11 @@ class _CoverBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(8),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withValues(alpha: 0.75), color],
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: Colors.white.withValues(alpha: 0.9),
+        color: Colors.white.withValues(alpha: 0.92),
         size: size * 0.46,
       ),
     );

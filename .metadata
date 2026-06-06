@@ -15,10 +15,6 @@ migration:
     - platform: root
       create_revision: aaa24c388b43b5504b21747684923eaae4356dbc
       base_revision: aaa24c388b43b5504b21747684923eaae4356dbc
-    - platform: web
-      create_revision: aaa24c388b43b5504b21747684923eaae4356dbc
-      base_revision: aaa24c388b43b5504b21747684923eaae4356dbc
-
   # User provided section
 
   # List of Local paths (relative to this file) that should be
