@@ -3,7 +3,7 @@ import 'package:isle_music/main.dart';
 
 void main() {
   testWidgets('renders SunnyTune Music desktop shell', (tester) async {
-    await tester.pumpWidget(const IsleMusicApp());
+    await tester.pumpWidget(const IsleMusicApp(enableAudio: false));
 
     expect(find.text('晴听音乐'), findsOneWidget);
     expect(find.text('SunnyTune Music'), findsOneWidget);

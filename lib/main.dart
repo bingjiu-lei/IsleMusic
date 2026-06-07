@@ -1,13 +1,17 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
 
 void main() {
+  MediaKit.ensureInitialized();
   runApp(const IsleMusicApp());
 }
 
 class IsleMusicApp extends StatelessWidget {
-  const IsleMusicApp({super.key});
+  const IsleMusicApp({super.key, this.enableAudio = true});
+
+  final bool enableAudio;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +33,7 @@ class IsleMusicApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const SunTuneShell(),
+      home: SunTuneShell(enableAudio: enableAudio),
     );
   }
 }
@@ -57,6 +61,7 @@ class DemoSong {
     required this.artist,
     required this.album,
     required this.duration,
+    required this.audioUrl,
     required this.color,
     this.liked = false,
   });
@@ -64,53 +69,47 @@ class DemoSong {
   final String title;
   final String artist;
   final String album;
-  final String duration;
+  final Duration duration;
+  final String audioUrl;
   final Color color;
   final bool liked;
 }
 
 const demoSongs = [
   DemoSong(
-    title: '晴窗来信',
-    artist: 'North Tide',
-    album: '晴听日记',
-    duration: '03:42',
+    title: '少年锦时',
+    artist: '赵雷',
+    album: '测试音乐',
+    duration: Duration(minutes: 4, seconds: 43),
+    audioUrl:
+        'https://img.leiyun.blog/file/音乐/1779897120694_少年锦时-赵雷-5835274-320.mp3',
     color: Color(0xFFA7D8D6),
     liked: true,
   ),
   DemoSong(
-    title: '薄荷午后',
-    artist: 'Mellow Room',
-    album: 'Clear Day',
-    duration: '04:16',
+    title: 'Imagine',
+    artist: 'John Lennon',
+    album: 'Remastered 2010',
+    duration: Duration(minutes: 3, seconds: 8),
+    audioUrl:
+        'https://img.leiyun.blog/file/音乐/1779526283836_Imagine_Remastered_2010_-John_Lennon-939544-320.mp3',
     color: Color(0xFFBFDCCF),
   ),
   DemoSong(
-    title: '岛屿电台',
-    artist: 'Blue Hour',
-    album: 'Wave Signal',
-    duration: '03:28',
+    title: '故乡',
+    artist: '叶启田',
+    album: '测试音乐',
+    duration: Duration(minutes: 3, seconds: 54),
+    audioUrl:
+        'https://img.leiyun.blog/file/音乐/1779507615116_故乡-叶启田-41209169-320.mp3',
     color: Color(0xFFAACDE1),
-  ),
-  DemoSong(
-    title: '晴色漫游',
-    artist: 'Soft Echo',
-    album: 'Light Walk',
-    duration: '03:55',
-    color: Color(0xFFEAD492),
-  ),
-  DemoSong(
-    title: '远处的灯',
-    artist: 'Night Window',
-    album: 'Quiet Road',
-    duration: '04:02',
-    color: Color(0xFFCABFE2),
-    liked: true,
   ),
 ];
 
 class SunTuneShell extends StatefulWidget {
-  const SunTuneShell({super.key});
+  const SunTuneShell({super.key, required this.enableAudio});
+
+  final bool enableAudio;
 
   @override
   State<SunTuneShell> createState() => _SunTuneShellState();
@@ -119,9 +118,112 @@ class SunTuneShell extends StatefulWidget {
 class _SunTuneShellState extends State<SunTuneShell> {
   int selectedIndex = 0;
   int currentSongIndex = 0;
-  bool isPlaying = true;
+  bool isPlaying = false;
+  Duration position = Duration.zero;
+  Duration duration = demoSongs.first.duration;
+  String? playbackError;
+  Player? player;
 
   DemoSong get currentSong => demoSongs[currentSongIndex];
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (!widget.enableAudio) return;
+
+    final audioPlayer = Player();
+    player = audioPlayer;
+    audioPlayer.stream.playing.listen((playing) {
+      if (!mounted) return;
+      setState(() => isPlaying = playing);
+    });
+    audioPlayer.stream.position.listen((value) {
+      if (!mounted) return;
+      setState(() => position = value);
+    });
+    audioPlayer.stream.duration.listen((value) {
+      if (!mounted) return;
+      setState(() {
+        duration = value == Duration.zero ? currentSong.duration : value;
+      });
+    });
+    audioPlayer.stream.error.listen((message) {
+      if (!mounted) return;
+      setState(() {
+        isPlaying = false;
+        playbackError = message.isEmpty ? '播放失败，请稍后重试。' : message;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    player?.dispose();
+    super.dispose();
+  }
+
+  Future<void> playSong(int index) async {
+    setState(() {
+      currentSongIndex = index;
+      position = Duration.zero;
+      duration = demoSongs[index].duration;
+      playbackError = null;
+    });
+
+    try {
+      if (player == null) {
+        setState(() => isPlaying = true);
+        return;
+      }
+
+      final media = Media(
+        _normalizeAudioUrl(demoSongs[index].audioUrl),
+        httpHeaders: const {
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      );
+
+      await player!.open(media, play: true);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        isPlaying = false;
+        playbackError = '播放失败，请检查网络或音频地址。';
+      });
+    }
+  }
+
+  Future<void> togglePlay() async {
+    if (isPlaying) {
+      await player?.pause();
+      return;
+    }
+
+    if (position == Duration.zero) {
+      await playSong(currentSongIndex);
+      return;
+    }
+
+    await player?.play();
+  }
+
+  Future<void> playPrevious() async {
+    final previousIndex =
+        (currentSongIndex - 1 + demoSongs.length) % demoSongs.length;
+    await playSong(previousIndex);
+  }
+
+  Future<void> playNext() async {
+    final nextIndex = (currentSongIndex + 1) % demoSongs.length;
+    await playSong(nextIndex);
+  }
+
+  Future<void> seekByRatio(double ratio) async {
+    final safeRatio = ratio.clamp(0.0, 1.0);
+    await player?.seek(duration * safeRatio);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,10 +263,7 @@ class _SunTuneShellState extends State<SunTuneShell> {
                             Expanded(
                               child: _HomeContent(
                                 onPlay: (index) {
-                                  setState(() {
-                                    currentSongIndex = index;
-                                    isPlaying = true;
-                                  });
+                                  playSong(index);
                                 },
                               ),
                             ),
@@ -178,22 +277,13 @@ class _SunTuneShellState extends State<SunTuneShell> {
                 _PlayerBar(
                   song: currentSong,
                   isPlaying: isPlaying,
-                  onTogglePlay: () {
-                    setState(() => isPlaying = !isPlaying);
-                  },
-                  onPrevious: () {
-                    setState(() {
-                      currentSongIndex =
-                          (currentSongIndex - 1 + demoSongs.length) %
-                          demoSongs.length;
-                    });
-                  },
-                  onNext: () {
-                    setState(() {
-                      currentSongIndex =
-                          (currentSongIndex + 1) % demoSongs.length;
-                    });
-                  },
+                  position: position,
+                  duration: duration,
+                  errorText: playbackError,
+                  onTogglePlay: togglePlay,
+                  onPrevious: playPrevious,
+                  onNext: playNext,
+                  onSeek: seekByRatio,
                 ),
               ],
             ),
@@ -791,7 +881,8 @@ class _SongRow extends StatelessWidget {
           SizedBox(
             width: 52,
             child: Text(
-              song.duration,
+              _formatDuration(song.duration),
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: SunTuneColors.muted),
             ),
           ),
@@ -909,16 +1000,24 @@ class _PlayerBar extends StatelessWidget {
   const _PlayerBar({
     required this.song,
     required this.isPlaying,
+    required this.position,
+    required this.duration,
+    required this.errorText,
     required this.onTogglePlay,
     required this.onPrevious,
     required this.onNext,
+    required this.onSeek,
   });
 
   final DemoSong song;
   final bool isPlaying;
+  final Duration position;
+  final Duration duration;
+  final String? errorText;
   final VoidCallback onTogglePlay;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+  final ValueChanged<double> onSeek;
 
   @override
   Widget build(BuildContext context) {
@@ -948,11 +1047,13 @@ class _PlayerBar extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    song.artist,
+                    errorText ?? song.artist,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: SunTuneColors.muted,
+                    style: TextStyle(
+                      color: errorText == null
+                          ? SunTuneColors.muted
+                          : const Color(0xFFB24A42),
                       fontSize: 13,
                     ),
                   ),
@@ -989,22 +1090,36 @@ class _PlayerBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 20),
-            const Text('01:18', style: TextStyle(color: SunTuneColors.muted)),
+            Text(
+              _formatDuration(position),
+              style: const TextStyle(color: SunTuneColors.muted),
+            ),
             const SizedBox(width: 10),
-            const Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(999)),
-                child: LinearProgressIndicator(
-                  value: 0.38,
-                  minHeight: 5,
-                  color: SunTuneColors.primaryStrong,
-                  backgroundColor: Color(0xFFDCE8EA),
+            Expanded(
+              child: SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 5,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 5,
+                  ),
+                  overlayShape: const RoundSliderOverlayShape(
+                    overlayRadius: 12,
+                  ),
+                  activeTrackColor: SunTuneColors.primaryStrong,
+                  inactiveTrackColor: const Color(0xFFDCE8EA),
+                  thumbColor: SunTuneColors.primaryStrong,
+                ),
+                child: Slider(
+                  value: _progressValue(position, duration),
+                  onChanged: onSeek,
                 ),
               ),
             ),
             const SizedBox(width: 10),
             Text(
-              song.duration,
+              _formatDuration(
+                duration == Duration.zero ? song.duration : duration,
+              ),
               style: const TextStyle(color: SunTuneColors.muted),
             ),
             const SizedBox(width: 18),
@@ -1029,6 +1144,22 @@ class _PlayerBar extends StatelessWidget {
       ),
     );
   }
+}
+
+double _progressValue(Duration position, Duration duration) {
+  if (duration.inMilliseconds <= 0) return 0;
+  final progress = position.inMilliseconds / duration.inMilliseconds;
+  return progress.clamp(0.0, 1.0);
+}
+
+String _formatDuration(Duration value) {
+  final minutes = value.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final seconds = value.inSeconds.remainder(60).toString().padLeft(2, '0');
+  return '$minutes:$seconds';
+}
+
+String _normalizeAudioUrl(String url) {
+  return Uri.parse(url).toString();
 }
 
 class _CoverBox extends StatelessWidget {
