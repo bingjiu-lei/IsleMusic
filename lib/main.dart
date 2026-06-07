@@ -5,18 +5,18 @@ import 'package:media_kit/media_kit.dart';
 
 void main() {
   MediaKit.ensureInitialized();
-  runApp(const IsleMusicApp());
+  runApp(const QingTingMusicApp());
 }
 
-class IsleMusicApp extends StatelessWidget {
-  const IsleMusicApp({super.key, this.enableAudio = true});
+class QingTingMusicApp extends StatelessWidget {
+  const QingTingMusicApp({super.key, this.enableAudio = true});
 
   final bool enableAudio;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SunnyTune Music',
+      title: 'QingTingMusic',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -378,7 +378,7 @@ class _Sidebar extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'SunnyTune Music',
+                        'QingTingMusic',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

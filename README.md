@@ -1,4 +1,4 @@
-# SunnyTune Music
+# QingTingMusic
 
 晴听音乐，一个干净、现代、轻量的 Windows 音乐播放器。
 
