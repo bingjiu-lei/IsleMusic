@@ -39,20 +39,23 @@ class QingTingMusicApp extends StatelessWidget {
 }
 
 class SunTuneColors {
-  static const page = Color(0xFFF4F8F9);
-  static const pageSoft = Color(0xFFEAF4F6);
+  static const page = Color(0xFFF6FAFA);
+  static const pageSoft = Color(0xFFEEF6F7);
   static const surface = Color(0xFFFFFFFF);
   static const surfaceSoft = Color(0xFFF8FBFB);
-  static const glass = Color(0xEAFBFEFE);
-  static const primary = Color(0xFF4AAFB8);
-  static const primaryStrong = Color(0xFF247F8B);
-  static const primarySoft = Color(0xFFE4F4F6);
-  static const sky = Color(0xFF9ECFE0);
-  static const sun = Color(0xFFF4C96A);
-  static const text = Color(0xFF172426);
-  static const muted = Color(0xFF6D7D80);
-  static const faint = Color(0xFF9AA9AB);
-  static const border = Color(0xFFDDE9EA);
+  static const glass = Color(0xF2FBFEFE);
+  static const primary = Color(0xFF2D8FA3);
+  static const primaryStrong = Color(0xFF176F80);
+  static const primarySoft = Color(0xFFE7F4F6);
+  static const sky = Color(0xFFB8DCE6);
+  static const sun = Color(0xFFF2C766);
+  static const sunSoft = Color(0xFFFFF6DA);
+  static const text = Color(0xFF152426);
+  static const muted = Color(0xFF6F7E80);
+  static const faint = Color(0xFFA4B0B2);
+  static const border = Color(0xFFE4EEEE);
+  static const rowHover = Color(0xFFF2F8F8);
+  static const playing = Color(0xFFEAF6F2);
 }
 
 class DemoSong {
@@ -262,6 +265,8 @@ class _SunTuneShellState extends State<SunTuneShell> {
                             const SizedBox(height: 18),
                             Expanded(
                               child: _HomeContent(
+                                currentSongIndex: currentSongIndex,
+                                isPlaying: isPlaying,
                                 onPlay: (index) {
                                   playSong(index);
                                 },
@@ -595,8 +600,14 @@ class _PrimaryLoginButton extends StatelessWidget {
 }
 
 class _HomeContent extends StatelessWidget {
-  const _HomeContent({required this.onPlay});
+  const _HomeContent({
+    required this.currentSongIndex,
+    required this.isPlaying,
+    required this.onPlay,
+  });
 
+  final int currentSongIndex;
+  final bool isPlaying;
   final ValueChanged<int> onPlay;
 
   @override
@@ -618,6 +629,8 @@ class _HomeContent extends StatelessWidget {
                 return _SongRow(
                   song: song,
                   index: index,
+                  isCurrent: index == currentSongIndex,
+                  isPlaying: isPlaying,
                   onPlay: () => onPlay(index),
                 );
               },
@@ -659,9 +672,13 @@ class _CheckinCard extends StatelessWidget {
           height: 150,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: SunTuneColors.surface,
+            gradient: const LinearGradient(
+              colors: [SunTuneColors.surface, SunTuneColors.sunSoft],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: SunTuneColors.border),
+            border: Border.all(color: const Color(0xFFF3E4B5)),
           ),
           child: isCompact
               ? Column(
@@ -759,12 +776,13 @@ class _CheckinIcon extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: SunTuneColors.primarySoft,
+        color: SunTuneColors.sunSoft,
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: SunTuneColors.sun.withValues(alpha: 0.42)),
       ),
       child: Icon(
         Icons.verified_rounded,
-        color: SunTuneColors.primaryStrong,
+        color: const Color(0xFFB98516),
         size: iconSize,
       ),
     );
@@ -816,97 +834,144 @@ class _SectionPanel extends StatelessWidget {
   }
 }
 
-class _SongRow extends StatelessWidget {
+class _SongRow extends StatefulWidget {
   const _SongRow({
     required this.song,
     required this.index,
+    required this.isCurrent,
+    required this.isPlaying,
     required this.onPlay,
   });
 
   final DemoSong song;
   final int index;
+  final bool isCurrent;
+  final bool isPlaying;
   final VoidCallback onPlay;
 
   @override
+  State<_SongRow> createState() => _SongRowState();
+}
+
+class _SongRowState extends State<_SongRow> {
+  bool isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 66,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 34,
-            child: Text(
-              '${index + 1}'.padLeft(2, '0'),
-              style: const TextStyle(color: SunTuneColors.faint),
+    final showPlay = isHovered || widget.isCurrent;
+    final rowColor = widget.isCurrent
+        ? SunTuneColors.playing
+        : isHovered
+        ? SunTuneColors.rowHover
+        : Colors.transparent;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => isHovered = true),
+      onExit: (_) => setState(() => isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 140),
+        height: 66,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: rowColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 34,
+              child: widget.isCurrent
+                  ? Icon(
+                      widget.isPlaying
+                          ? Icons.equalizer_rounded
+                          : Icons.music_note_rounded,
+                      color: SunTuneColors.primaryStrong,
+                      size: 18,
+                    )
+                  : Text(
+                      '${widget.index + 1}'.padLeft(2, '0'),
+                      style: const TextStyle(color: SunTuneColors.faint),
+                    ),
             ),
-          ),
-          _CoverBox(color: song.color, size: 42),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  song.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: SunTuneColors.text,
-                    fontWeight: FontWeight.w800,
+            _CoverBox(color: widget.song.color, size: 42),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.song.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: widget.isCurrent
+                          ? SunTuneColors.primaryStrong
+                          : SunTuneColors.text,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    widget.song.artist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SunTuneColors.muted,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Text(
+                widget.song.album,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: SunTuneColors.muted),
+              ),
+            ),
+            SizedBox(
+              width: 52,
+              child: Text(
+                _formatDuration(widget.song.duration),
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(color: SunTuneColors.muted),
+              ),
+            ),
+            IconButton(
+              tooltip: widget.song.liked ? '取消收藏' : '收藏',
+              onPressed: () {},
+              icon: Icon(
+                widget.song.liked
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_border_rounded,
+                color: widget.song.liked
+                    ? SunTuneColors.primaryStrong
+                    : SunTuneColors.muted,
+              ),
+            ),
+            SizedBox(
+              width: 42,
+              child: AnimatedOpacity(
+                opacity: showPlay ? 1 : 0,
+                duration: const Duration(milliseconds: 120),
+                child: IconButton(
+                  tooltip: '播放',
+                  onPressed: widget.onPlay,
+                  icon: Icon(
+                    widget.isCurrent && widget.isPlaying
+                        ? Icons.pause_circle_filled_rounded
+                        : Icons.play_circle_fill_rounded,
+                    color: SunTuneColors.primaryStrong,
                   ),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  song.artist,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: SunTuneColors.muted,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
-            child: Text(
-              song.album,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: SunTuneColors.muted),
-            ),
-          ),
-          SizedBox(
-            width: 52,
-            child: Text(
-              _formatDuration(song.duration),
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: SunTuneColors.muted),
-            ),
-          ),
-          IconButton(
-            tooltip: song.liked ? '取消收藏' : '收藏',
-            onPressed: () {},
-            icon: Icon(
-              song.liked
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_border_rounded,
-              color: song.liked
-                  ? SunTuneColors.primaryStrong
-                  : SunTuneColors.muted,
-            ),
-          ),
-          IconButton(
-            tooltip: '播放',
-            onPressed: onPlay,
-            icon: const Icon(
-              Icons.play_arrow_rounded,
-              color: SunTuneColors.primaryStrong,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1022,15 +1087,27 @@ class _PlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 86,
+      height: 96,
       child: _GlassPanel(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           children: [
-            _CoverBox(color: song.color, size: 56),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: song.color.withValues(alpha: 0.28),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: _CoverBox(color: song.color, size: 60),
+            ),
             const SizedBox(width: 12),
             SizedBox(
-              width: 180,
+              width: 168,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1074,11 +1151,12 @@ class _PlayerBar extends StatelessWidget {
                 backgroundColor: SunTuneColors.primaryStrong,
                 foregroundColor: Colors.white,
                 shape: const CircleBorder(),
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(15),
+                elevation: 0,
               ),
               child: Icon(
                 isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                size: 28,
+                size: 30,
               ),
             ),
             IconButton(
@@ -1089,7 +1167,7 @@ class _PlayerBar extends StatelessWidget {
                 color: SunTuneColors.muted,
               ),
             ),
-            const SizedBox(width: 20),
+            const SizedBox(width: 14),
             Text(
               _formatDuration(position),
               style: const TextStyle(color: SunTuneColors.muted),
@@ -1098,15 +1176,15 @@ class _PlayerBar extends StatelessWidget {
             Expanded(
               child: SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  trackHeight: 5,
+                  trackHeight: 4,
                   thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 5,
+                    enabledThumbRadius: 4,
                   ),
                   overlayShape: const RoundSliderOverlayShape(
                     overlayRadius: 12,
                   ),
                   activeTrackColor: SunTuneColors.primaryStrong,
-                  inactiveTrackColor: const Color(0xFFDCE8EA),
+                  inactiveTrackColor: SunTuneColors.border,
                   thumbColor: SunTuneColors.primaryStrong,
                 ),
                 child: Slider(
@@ -1122,7 +1200,7 @@ class _PlayerBar extends StatelessWidget {
               ),
               style: const TextStyle(color: SunTuneColors.muted),
             ),
-            const SizedBox(width: 18),
+            const SizedBox(width: 12),
             IconButton(
               tooltip: '音量',
               onPressed: () {},
@@ -1170,19 +1248,69 @@ class _CoverBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
-      ),
-      child: Icon(
-        Icons.music_note_rounded,
-        color: Colors.white.withValues(alpha: 0.92),
-        size: size * 0.46,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.alphaBlend(Colors.white.withValues(alpha: 0.18), color),
+              color,
+              Color.alphaBlend(
+                SunTuneColors.primary.withValues(alpha: 0.18),
+                color,
+              ),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.55)),
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            CustomPaint(painter: _CoverWavePainter()),
+            Center(
+              child: Icon(
+                Icons.music_note_rounded,
+                color: Colors.white.withValues(alpha: 0.92),
+                size: size * 0.46,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _CoverWavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < 3; i++) {
+      final y = size.height * (0.34 + i * 0.18);
+      final path = Path()
+        ..moveTo(size.width * 0.14, y)
+        ..cubicTo(
+          size.width * 0.34,
+          y - size.height * 0.11,
+          size.width * 0.56,
+          y + size.height * 0.11,
+          size.width * 0.84,
+          y,
+        );
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
